@@ -1,6 +1,47 @@
 {% extends "base.html" %}
 
 {% block content %}
-<h1 class="text-center">Welcome to Chat Connect</h1>
-<p class="text-center">Conect with people around the world</p>
+<div class="container">
+    <h1 class="text-center my-4">Chat en Tiempo Real</h1>
+
+    <div id="chat-container" class="border rounded p-3 mb-3">
+        <ul id="messages" class="list-unstyled"></ul>
+    </div>
+
+    <form onsubmit="return sendMessage(event)" class="input-group">
+        <input type="text" id="messageText" class="form-control" placeholder="Escribe tu mensaje..." autocomplete="off">
+        <button class="btn btn-primary">Enviar</button>
+    </form>
+</div>
+
+<script>
+    const ws = new WebSocket("ws://" + window.location.host + "/ws");
+
+    ws.onmessage = function (event) {
+        const messages = document.getElementById('messages');
+        const li = document.createElement('li');
+        li.textContent = event.data;
+        messages.appendChild(li);
+
+        // Auto-scroll al último mensaje
+        messages.scrollTop = messages.scrollHeight;
+    };
+
+    function sendMessage(event) {
+        const input = document.getElementById('messageText');
+        if (input.value.trim()) {
+            ws.send(input.value);
+            input.value = '';
+        }
+        event.preventDefault();
+    }
+</script>
+
+<style>
+    #chat-container {
+        height: 400px;
+        overflow-y: auto;
+        background-color: #f8f9fa;
+    }
+</style>
 {% endblock %}
