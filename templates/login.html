@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login / Sign Up</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+    <div class="container">
+        <div class="row justify-content-center mt-5">
+            <div class="col-md-6 col-lg-4">
+                <div class="card shadow">
+                    <div class="card-header bg-white">
+                        <ul class="nav nav-tabs card-header-tabs" id="authTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="login-tab" data-bs-toggle="tab"
+                                    data-bs-target="#login" type="button" role="tab" aria-controls="login"
+                                    aria-selected="true">Login</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="signup-tab" data-bs-toggle="tab" data-bs-target="#signup"
+                                    type="button" role="tab" aria-controls="signup" aria-selected="false">Sign
+                                    Up</button>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body p-4">
+                        <div class="tab-content" id="authTabsContent">
+                            <!-- Login Form -->
+                            <div class="tab-pane fade show active" id="login" role="tabpanel"
+                                aria-labelledby="login-tab">
+                                <h4 class="card-title text-center mb-4">Welcome Back</h4>
+                                <form action="/login" method="post">
+                                    <div class="mb-3">
+                                        <label for="loginUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="loginUsername" name="username"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="loginPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="loginPassword" name="password"
+                                            required>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">Login</button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            <!-- Sign Up Form -->
+                            <div class="tab-pane fade" id="signup" role="tabpanel" aria-labelledby="signup-tab">
+                                <h4 class="card-title text-center mb-4">Create Account</h4>
+                                <form action="/signup" method="post">
+                                    <div class="mb-3">
+                                        <label for="signupUsername" class="form-label">Username</label>
+                                        <input type="text" class="form-control" id="signupUsername" name="username"
+                                            required>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="signupPassword" class="form-label">Password</label>
+                                        <input type="password" class="form-control" id="signupPassword" name="password"
+                                            required>
+                                        <div class="form-text">Password must be at least 8 characters long.</div>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="confirmPassword" class="form-label">Confirm Password</label>
+                                        <input type="password" class="form-control" id="confirmPassword"
+                                            name="confirmPassword" required>
+                                    </div>
+                                    <div class="d-grid">
+                                        <button type="submit" class="btn btn-primary">Sign Up</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
