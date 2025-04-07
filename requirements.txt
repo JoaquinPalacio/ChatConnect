@@ -5,4 +5,4 @@ sqlmodel
 passlib
 psycopg2
 python-multipart
-bcrypt
+bcrypt==4.0.1

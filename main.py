@@ -100,4 +100,6 @@ async def signup_post(
         session.add(user)
         session.commit()
         session.refresh(user)
-    return RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    response.set_cookie(key="user", value=name)
+    return response
