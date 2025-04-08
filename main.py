@@ -71,7 +71,7 @@ async def login_post(
         user = session.exec(statement).first()
         if not user or not verify_password(password, user.password):
             return templates.TemplateResponse(
-                "login.html", {"request": request, "error": "Credenciales inválidas"}
+                "login.html", {"request": request, "error": "Invalid credentials"}
             )
     response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="user", value=name)
@@ -92,7 +92,7 @@ async def signup_post(
 ):
     if password != confirmPassword:
         return templates.TemplateResponse(
-            "login.html", {"request": request, "error": "Las contraseñas no coinciden"}
+            "login.html", {"request": request, "error": "Passwords do not match"}
         )
     hashed_password = get_password_hash(password)
     user = User(name=name, password=hashed_password)
@@ -102,4 +102,11 @@ async def signup_post(
         session.refresh(user)
     response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
     response.set_cookie(key="user", value=name)
+    return response
+
+
+@app.get("/logout")
+async def logout():
+    response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
+    response.delete_cookie(key="user")
     return response
