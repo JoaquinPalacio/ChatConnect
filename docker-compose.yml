@@ -1,0 +1,32 @@
+services:
+  db:
+    image: postgres:15
+    container_name: ChatConnect-db
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=pafejo
+      - POSTGRES_DB=ChatConnect
+    ports:
+      - "5434:5432"    
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+
+  web:
+    build: .
+    container_name: ChatConnect-web
+    depends_on:
+      db:
+        condition: service_healthy
+    env_file:
+      - .env
+    ports:
+      - "8002:8000"
+    volumes:
+      - .:/app
+
+volumes:
+  db_data:

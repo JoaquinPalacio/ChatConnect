@@ -1,11 +1,7 @@
 from sqlmodel import SQLModel, create_engine
 import os
 
-DATABASE_URL = (
-    f"postgresql://{os.environ['DB_USER']}:{os.environ['DB_PASSWORD']}@"
-    f"{os.environ['DB_HOST']}:{os.environ['DB_PORT']}/{os.environ['DB_NAME']}"
-)
-
+DATABASE_URL = os.environ["DATABASE_URL"]
 try:
     engine = create_engine(DATABASE_URL)
     SQLModel.metadata.create_all(engine)
