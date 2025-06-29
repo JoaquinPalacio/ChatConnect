@@ -3,18 +3,30 @@ from fastapi import (
     Request,
     WebSocket,
     WebSocketDisconnect,
-    Form,
     status,
+    HTTPException,
+    Depends,
 )
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import RedirectResponse
-from sqlmodel import Session, select
-from models import User
-from db import engine
-from utils import verify_password, get_password_hash
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlmodel import Session
+from db import engine, get_session
+from utils import verify_password, create_acces_token
+from sqlmodel import SQLModel
 from typing import Dict
+from contextlib import asynccontextmanager
+from crud import get_user_by_username, create_user
+from schemas import UserCreate
 
-app = FastAPI()
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    SQLModel.metadata.create_all(engine)
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
 templates = Jinja2Templates(directory="templates")
 
 
@@ -63,45 +75,44 @@ async def login(request: Request):
 
 
 @app.post("/login")
-async def login_post(
-    request: Request, name: str = Form(...), password: str = Form(...)
-):
-    with Session(engine) as session:
-        statement = select(User).where(User.name == name)
-        user = session.exec(statement).first()
-        if not user or not verify_password(password, user.password):
-            return templates.TemplateResponse(
-                "login.html", {"request": request, "error": "Invalid credentials"}
-            )
-    response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-    response.set_cookie(key="user", value=name)
+async def login_post(request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    username = form.get("name")
+    password = form.get("password")
+    user = get_user_by_username(session, username)
+    if not user or not verify_password(password, user.hashed_password):
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "Invalid credentials"},
+            status_code=401,
+        )
+    response = RedirectResponse(url="/", status_code=302)
+    response.set_cookie(key="user", value=username, httponly=True)
     return response
 
 
-@app.get("/signup")
-async def signup_get(request: Request):
-    return templates.TemplateResponse("signup.html", {"request": request})
-
-
 @app.post("/signup")
-async def signup_post(
-    request: Request,
-    name: str = Form(...),
-    password: str = Form(...),
-    confirmPassword: str = Form(...),
-):
-    if password != confirmPassword:
+async def signup_post(request: Request, session: Session = Depends(get_session)):
+    form = await request.form()
+    username = form.get("name")
+    password = form.get("password")
+    confirm_password = form.get("confirmPassword")
+    if password != confirm_password:
         return templates.TemplateResponse(
-            "login.html", {"request": request, "error": "Passwords do not match"}
+            "login.html",
+            {"request": request, "error": "Passwords do not match"},
+            status_code=400,
         )
-    hashed_password = get_password_hash(password)
-    user = User(name=name, password=hashed_password)
-    with Session(engine) as session:
-        session.add(user)
-        session.commit()
-        session.refresh(user)
-    response = RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
-    response.set_cookie(key="user", value=name)
+    db_user = get_user_by_username(session, username)
+    if db_user:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "Username already registered"},
+            status_code=400,
+        )
+    create_user(session, username, password)
+    response = RedirectResponse(url="/", status_code=302)
+    response.set_cookie(key="user", value=username, httponly=True)
     return response
 
 
