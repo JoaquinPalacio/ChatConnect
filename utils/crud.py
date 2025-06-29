@@ -1,6 +1,6 @@
 from sqlmodel import Session, select
-from models import User
-from utils import hash_password
+from db.models import User
+from utils.security import hash_password
 
 
 def get_user_by_username(session: Session, username: str):
