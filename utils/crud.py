@@ -1,5 +1,5 @@
 from sqlmodel import Session, select
-from db.models import User
+from db.models import User, Message
 from utils.security import hash_password
 
 
@@ -14,3 +14,11 @@ def create_user(session: Session, username: str, password: str):
     session.commit()
     session.refresh(user)
     return user
+
+
+def create_message(session: Session, content: str, user_id: int | None = None):
+    message = Message(user_id=user_id, content=content)
+    session.add(message)
+    session.commit()
+    session.refresh(message)
+    return message
