@@ -2,7 +2,7 @@ from fastapi import Request, WebSocket, WebSocketDisconnect, APIRouter, Depends
 from sqlmodel import Session
 
 from utils.connection_manager import ConnectionManager
-from utils.crud import get_user_by_username, create_message
+from utils.crud import get_user_by_username, create_message, get_last_messages
 from utils.templates_env import templates
 from db.database import get_session
 
@@ -12,9 +12,12 @@ router = APIRouter()
 
 
 @router.get("/")
-async def home(request: Request):
+async def home(request: Request, session: Session = Depends(get_session)):
     user = request.cookies.get("user")
-    return templates.TemplateResponse("index.html", {"request": request, "user": user})
+    messages = get_last_messages(session, limit=30)
+    return templates.TemplateResponse(
+        "index.html", {"request": request, "user": user, "messages": messages}
+    )
 
 
 @router.websocket("/ws")

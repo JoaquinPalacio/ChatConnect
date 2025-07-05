@@ -22,3 +22,21 @@ def create_message(session: Session, content: str, user_id: int | None = None):
     session.commit()
     session.refresh(message)
     return message
+
+
+def get_last_messages(session: Session, limit: int = 30):
+    statement = (
+        select(Message, User.username)
+        .join(User, Message.user_id == User.id, isouter=True)
+        .order_by(Message.timestamp.desc())
+        .limit(limit)
+    )
+    results = session.exec(statement).all()
+    return [
+        {
+            "username": username or "Anon",
+            "content": msg.content,
+            "timestamp": msg.timestamp,
+        }
+        for msg, username in reversed(results)
+    ]

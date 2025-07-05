@@ -5,7 +5,14 @@
     <h1 class="text-center my-4">Chat en Tiempo Real</h1>
 
     <div id="chat-container" class="border rounded p-3 mb-3">
-        <ul id="messages" class="list-unstyled"></ul>
+        <ul id="messages" class="list-unstyled">
+            {% for msg in messages %}
+            <li>
+                <span class="text-muted small">[{{ msg.timestamp.strftime('%H:%M') }}]</span>
+                <strong>{{ msg.username }}:</strong> {{ msg.content }}
+            </li>
+            {% endfor %}
+        </ul>
     </div>
 
     <form onsubmit="return sendMessage(event)" class="input-group">
