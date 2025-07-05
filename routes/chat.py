@@ -1,5 +1,7 @@
 from fastapi import Request, WebSocket, WebSocketDisconnect, APIRouter, Depends
 from sqlmodel import Session
+from datetime import datetime
+import json
 
 from utils.connection_manager import ConnectionManager
 from utils.crud import get_user_by_username, create_message, get_last_messages
@@ -29,7 +31,13 @@ async def websocket_endpoint(
     try:
         while True:
             data = await websocket.receive_text()
-            await manager.broadcast(f"{username}: {data}")
+            now = datetime.now()
+            message = {
+                "username": username,
+                "content": data,
+                "timestamp": now.strftime("%H:%M"),
+            }
+            await manager.broadcast(json.dumps(message))
             user = get_user_by_username(session, username)
             if user:
                 create_message(session, content=data, user_id=user.id)

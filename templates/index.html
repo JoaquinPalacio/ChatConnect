@@ -26,11 +26,10 @@
 
     ws.onmessage = function (event) {
         const messages = document.getElementById('messages');
+        const data = JSON.parse(event.data);
         const li = document.createElement('li');
-        li.textContent = event.data;
+        li.innerHTML = `<span class="text-muted small">[${data.timestamp}]</span> <strong>${data.username}:</strong> ${data.content}`;
         messages.appendChild(li);
-
-        // Auto-scroll al último mensaje
         messages.scrollTop = messages.scrollHeight;
     };
 
@@ -42,6 +41,11 @@
         }
         event.preventDefault();
     }
+
+    window.onload = function () {
+        const chatContainer = document.getElementById('chat-container');
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+    };
 </script>
 
 <style>
