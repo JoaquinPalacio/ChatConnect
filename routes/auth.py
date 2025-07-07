@@ -13,7 +13,7 @@ router = APIRouter()
 
 @router.get("/login")
 async def login(request: Request):
-    return templates.TemplateResponse("login.html", {"request": request})
+    return templates.TemplateResponse(request, "login.html")
 
 
 @router.post("/login")
@@ -24,8 +24,9 @@ async def login_post(request: Request, session: Session = Depends(get_session)):
     user = get_user_by_username(session, username)
     if not user or not verify_password(password, user.hashed_password):
         return templates.TemplateResponse(
+            request,
             "login.html",
-            {"request": request, "error": "Invalid credentials"},
+            {"error": "Invalid credentials"},
             status_code=401,
         )
     response = RedirectResponse(url="/", status_code=302)
@@ -41,15 +42,17 @@ async def signup_post(request: Request, session: Session = Depends(get_session))
     confirm_password = form.get("confirmPassword")
     if password != confirm_password:
         return templates.TemplateResponse(
+            request,
             "login.html",
-            {"request": request, "error": "Passwords do not match"},
+            {"error": "Passwords do not match"},
             status_code=400,
         )
     db_user = get_user_by_username(session, username)
     if db_user:
         return templates.TemplateResponse(
+            request,
             "login.html",
-            {"request": request, "error": "Username already registered"},
+            {"error": "Username already registered"},
             status_code=400,
         )
     create_user(session, username, password)

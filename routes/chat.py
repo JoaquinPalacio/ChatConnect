@@ -18,7 +18,7 @@ async def home(request: Request, session: Session = Depends(get_session)):
     user = request.cookies.get("user")
     messages = get_last_messages(session, limit=30)
     return templates.TemplateResponse(
-        "index.html", {"request": request, "user": user, "messages": messages}
+        request, "index.html", {"user": user, "messages": messages}
     )
 
 
