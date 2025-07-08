@@ -4,3 +4,5 @@ __pycache__/
 plan.md
 api.md
 architecture.md
+alembic/versions/
+.pytest_cache/
