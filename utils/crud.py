@@ -16,8 +16,13 @@ def create_user(session: Session, username: str, password: str):
     return user
 
 
-def create_message(session: Session, content: str, user_id: int | None = None):
-    message = Message(user_id=user_id, content=content)
+def create_message(
+    session: Session,
+    content: str,
+    user_id: int | None = None,
+    room_id: int | None = None,
+):
+    message = Message(user_id=user_id, content=content, room_id=room_id)
     session.add(message)
     session.commit()
     session.refresh(message)
