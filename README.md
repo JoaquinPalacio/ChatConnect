@@ -26,11 +26,14 @@ Aplicación web de chat en tiempo real construida con **FastAPI**, **WebSockets*
 - [Docker](https://www.docker.com/) y [Docker Compose](https://docs.docker.com/compose/)
 - (Opcional) Python 3.11+ para ejecución local sin Docker
 
+## Instalación
+
 ### Con Docker (recomendado)
 
 ```bash
 git clone https://github.com/joaquinpalacio/ChatConnect.git
 cd ChatConnect
+cp .env.example .env
 docker-compose up --build
 ```
 Asegurarse de tener Docker instalado.
@@ -43,17 +46,22 @@ cd ChatConnect
 python -m venv venv
 source venv/bin/activate  # En Windows: venv\Scripts\activate
 pip install -r requirements.txt
-# Configura tus variables de entorno en un archivo .env
+cp .env.example .env
 uvicorn main:app --reload
 ```
 
 ## Variables de entorno
 
-Crea un archivo `.env` en la raíz con el siguiente contenido:
+Las variables necesarias se definen en .env. Puedes usar el archivo .env.example como base:
 
 ```
-DATABASE_URL=postgresql://usuario:contraseña@localhost:5432/chatconnect
-SECRET_KEY=tu_clave_secreta
+POSTGRES_USER=admin
+POSTGRES_PASSWORD=admin
+POSTGRES_DB=chatconnect
+POSTGRES_HOST=db
+POSTGRES_PORT=5432
+DATABASE_URL=postgresql://admin:admin@db:5432/chatconnect
+SECRET_KEY=supersecretkey
 ```
 
 ## Uso
