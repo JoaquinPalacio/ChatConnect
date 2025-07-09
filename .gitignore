@@ -1,8 +1,27 @@
-venv/
+# Byte-compiled / optimized / DLL files
 __pycache__/
+*.py[cod]
+*.pyo
+
+# VS Code dev containers
+.devcontainer/devcontainer.env
+
+# Environment variables
 .env
-plan.md
-api.md
-architecture.md
-alembic/versions/
+
+# Docker
+*.log
+docker-compose.override.yml
+
+# Testing
 .pytest_cache/
+.coverage
+htmlcov/
+
+# Alembic
+alembic/versions/*.pyc
+alembic/versions/__pycache__/
+
+# System
+.DS_Store
+Thumbs.db
