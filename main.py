@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     try:
         room = session.exec(select(Room).where(Room.name == "global")).first()
         if not room:
-            public_room = Room(name="global", is_private=False)
+            public_room = Room(name="global", is_private=False, owner_id=None)
             session.add(public_room)
             session.commit()
         yield
