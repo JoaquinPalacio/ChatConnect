@@ -2,10 +2,8 @@ services:
   db:
     image: postgres:15
     container_name: ChatConnect-db
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=pafejo
-      - POSTGRES_DB=ChatConnect
+    env_file:
+      - .env
     ports:
       - "5434:5432"    
     volumes:
