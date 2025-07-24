@@ -22,7 +22,7 @@
 </div>
 
 <script>
-    const ws = new WebSocket("ws://" + window.location.host + "/ws");
+    const ws = new WebSocket("ws://" + window.location.host + "/ws/global");
 
     ws.onmessage = function (event) {
         const messages = document.getElementById('messages');

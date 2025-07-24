@@ -17,17 +17,18 @@ router = APIRouter()
 @router.get("/")
 async def home(request: Request, session: Session = Depends(get_session)):
     user = request.cookies.get("user")
-    messages = get_last_messages(session, limit=30)
+    messages = get_last_messages(session, limit=30, room_id=1)
     return templates.TemplateResponse(
         request, "index.html", {"user": user, "messages": messages}
     )
 
 
-@router.websocket("/ws")
+@router.websocket("/ws/global")
 async def websocket_endpoint(
     websocket: WebSocket, session: Session = Depends(get_session)
 ):
     username = websocket.cookies.get("user", "Anon")
+    print(f"User {username} connected")
     room_name = "global"
     room = session.exec(select(Room).where(Room.name == room_name)).first()
     room_id = room.id if room else None
@@ -51,3 +52,4 @@ async def websocket_endpoint(
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"{username} disconnected")
+
