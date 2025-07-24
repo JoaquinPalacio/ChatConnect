@@ -12,7 +12,7 @@ from db.models import SQLModel
 # access to the values within the .ini file in use.
 config = context.config
 
-DATABASE_URL = os.environ.get("DATABASE_URL")
+DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///default.db")
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

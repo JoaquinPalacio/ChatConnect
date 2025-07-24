@@ -14,5 +14,6 @@ def session():
 def test_create_and_get_user(session):
     user = create_user(session, "testuser", "testpass")
     fetched = get_user_by_username(session, "testuser")
+    assert fetched is not None
     assert fetched.id == user.id
     assert fetched.username == "testuser"

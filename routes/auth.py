@@ -19,8 +19,8 @@ async def login(request: Request):
 @router.post("/login")
 async def login_post(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
-    username = form.get("name")
-    password = form.get("password")
+    username = str(form.get("name"))
+    password = str(form.get("password"))
     user = get_user_by_username(session, username)
     if not user or not verify_password(password, user.hashed_password):
         return templates.TemplateResponse(
@@ -37,8 +37,8 @@ async def login_post(request: Request, session: Session = Depends(get_session)):
 @router.post("/signup")
 async def signup_post(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
-    username = form.get("name")
-    password = form.get("password")
+    username = str(form.get("name"))
+    password = str(form.get("password"))
     confirm_password = form.get("confirmPassword")
     if password != confirm_password:
         return templates.TemplateResponse(
