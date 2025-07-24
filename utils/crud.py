@@ -1,5 +1,6 @@
 from sqlmodel import Session, select
-from db.models import User, Message
+from sqlalchemy import desc, cast, DateTime
+from db.models import User, Message, Room
 from utils.security import hash_password
 
 
@@ -29,13 +30,15 @@ def create_message(
     return message
 
 
-def get_last_messages(session: Session, limit: int = 30):
+def get_last_messages(session: Session, limit: int = 30, room_id: int | None = None):
+
     statement = (
         select(Message, User.username)
-        .join(User, Message.user_id == User.id, isouter=True)
-        .order_by(Message.timestamp.desc())
-        .limit(limit)
+        .outerjoin(User)
     )
+    if room_id is not None:
+        statement = statement.where(Message.room_id == room_id)
+    statement = statement.order_by(desc(cast(Message.timestamp, DateTime))).limit(limit)
     results = session.exec(statement).all()
     return [
         {
@@ -45,3 +48,21 @@ def get_last_messages(session: Session, limit: int = 30):
         }
         for msg, username in reversed(results)
     ]
+
+
+def create_room(
+        session: Session,
+        name: str,
+        owner_id: int | None = None,
+        is_private: bool = False,
+        password: str | None = None):
+    room = Room(
+        name=name,
+        owner_id=owner_id,
+        is_private=bool(is_private),
+        hashed_password=hash_password(password) if password else None
+    )
+    session.add(room)
+    session.commit()
+    session.refresh(room)
+    return room

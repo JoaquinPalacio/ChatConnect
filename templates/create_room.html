@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<body class="bg-light">
+    <div class="container mt-5">
+        <h2 class="mb-4">Crear nueva sala</h2>
+        <form method="post" action="/create_room" class="card p-4 shadow-sm">
+            <div class="mb-3">
+                <label for="name" class="form-label">Nombre de la sala</label>
+                <input type="text" class="form-control" id="name" name="name" required>
+            </div>
+            <div class="form-check mb-3">
+                <input class="form-check-input" type="checkbox" id="isPrivate" name="isPrivate">
+                <label class="form-check-label" for="isPrivate">
+                    Sala privada
+                </label>
+            </div>
+            <div class="mb-3" id="passwordField" style="display: none;">
+                <label for="password" class="form-label">Contraseña</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+            <button type="submit" class="btn btn-primary">Crear sala</button>
+        </form>
+    </div>
+    <script>
+        // Mostrar/ocultar campo contraseña según el checkbox
+        document.getElementById('isPrivate').addEventListener('change', function () {
+            document.getElementById('passwordField').style.display = this.checked ? 'block' : 'none';
+        });
+    </script>
+</body>
+
+</html>
+{% endblock %}

@@ -3,7 +3,7 @@ from db.database import engine, get_session
 from sqlmodel import SQLModel, select
 from contextlib import asynccontextmanager
 from db.models import Room
-from routes import auth, chat
+from routes import auth, chat, rooms
 
 
 @asynccontextmanager
@@ -24,3 +24,4 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 app.include_router(auth.router)
 app.include_router(chat.router)
+app.include_router(rooms.router)
