@@ -8,6 +8,7 @@ from db.database import get_session
 from db.models import Room
 from utils.crud import get_user_by_username, create_room, create_message, get_last_messages
 from utils.templates_env import templates
+from utils.security import verify_password
 from utils.connection_manager import ConnectionManager
 
 
@@ -27,9 +28,24 @@ async def room_id(request: Request, room_id: int, session: Session = Depends(get
     messages = get_last_messages(session, limit=30, room_id=room_id)
     if room is None:
         return templates.TemplateResponse("404.html", {"request": request, "user": user.username if user else None}, status_code=status.HTTP_404_NOT_FOUND)
-    if room.is_private: #TODO
-        return templates.TemplateResponse("403.html", {"request": request, "user": user.username if user else None}, status_code=status.HTTP_403_FORBIDDEN)
+    if room.is_private:
+        if request.cookies.get(f"room_{room_id}_access") != "granted":
+            return templates.TemplateResponse("room_password.html", {"request": request, "user": user.username if user else None, "room": room})
     return templates.TemplateResponse("room_id.html", {"request": request, "user": user.username if user else None, "room": room, "messages": messages})
+
+@router.post("/rooms/{room_id}/password")
+async def room_password(request: Request, room_id: int, session: Session = Depends(get_session)):
+    user = get_user_by_username(session, str(request.cookies.get("user")))
+    room = session.get(Room, room_id)
+    if room is None:
+        return templates.TemplateResponse("404.html", {"request": request, "user": user.username if user else None}, status_code=status.HTTP_404_NOT_FOUND)
+    form = await request.form()
+    password = str(form.get("password"))
+    if room.hashed_password and verify_password(password, room.hashed_password):
+        response = RedirectResponse(url=f"/rooms/{room_id}", status_code=302)
+        response.set_cookie(key=f"room_{room_id}_access", value="granted")
+        return response
+    return templates.TemplateResponse("room_password.html", {"request": request, "user": user.username if user else None, "room": room, "error": "Invalid password"})
 
 @router.websocket("/ws/{room_id}")
 async def websocket_room(
