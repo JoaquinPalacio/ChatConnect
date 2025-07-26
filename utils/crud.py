@@ -1,6 +1,8 @@
 from sqlmodel import Session, select
 from sqlalchemy import desc, cast, DateTime
-from db.models import User, Message, Room
+from db.models.room import Room
+from db.models.user import User
+from db.models.message import Message
 from utils.security import hash_password
 
 

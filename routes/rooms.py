@@ -5,7 +5,7 @@ from datetime import datetime
 import json
 
 from db.database import get_session
-from db.models import Room
+from db.models.room import Room
 from utils.crud import get_user_by_username, create_room, create_message, get_last_messages
 from utils.templates_env import templates
 from utils.security import verify_password

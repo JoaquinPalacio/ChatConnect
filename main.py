@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from db.database import engine, get_session
 from sqlmodel import SQLModel, select
 from contextlib import asynccontextmanager
-from db.models import Room
+from db.models.room import Room
 from routes import auth, chat, rooms
 
 
