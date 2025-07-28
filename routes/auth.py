@@ -1,10 +1,10 @@
 from fastapi import APIRouter, Request, Depends, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
-
+from datetime import timedelta
 from db.database import get_session
 from utils.crud import get_user_by_username, create_user
-from utils.security import verify_password
+from utils.security import verify_password, create_acces_token
 from utils.templates_env import templates
 
 
@@ -29,8 +29,17 @@ async def login_post(request: Request, session: Session = Depends(get_session)):
             {"error": "Invalid credentials"},
             status_code=401,
         )
+    access_token = create_acces_token(
+        data={"sub": user.username}, expires_delta=timedelta(hours=2)
+    )
     response = RedirectResponse(url="/", status_code=302)
-    response.set_cookie(key="user", value=username, httponly=True)
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        max_age=7200,
+        samesite="lax",
+    )
     return response
 
 
@@ -57,12 +66,26 @@ async def signup_post(request: Request, session: Session = Depends(get_session))
         )
     create_user(session, username, password)
     response = RedirectResponse(url="/", status_code=302)
-    response.set_cookie(key="user", value=username, httponly=True)
+    access_token = create_acces_token(
+        data={"sub": username}, expires_delta=timedelta(hours=2)
+    )
+    response.set_cookie(
+        key="access_token",
+        value=access_token,
+        httponly=True,
+        max_age=7200,
+        samesite="lax",
+    )
     return response
 
 
 @router.get("/logout")
-async def logout():
+async def logout(request: Request):
     response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
-    response.delete_cookie(key="user")
+    response.delete_cookie("access_token")
+
+    for key in request.cookies:
+        if key.startswith("room_") and key.endswith("_access"):
+            response.delete_cookie(key)
+
     return response

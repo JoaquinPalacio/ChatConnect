@@ -24,3 +24,14 @@ def create_acces_token(data: dict, expires_delta: Optional[timedelta]):
     expire = datetime.now() + (expires_delta or timedelta(minutes=15))
     to_encode.update({"exp": expire})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+
+
+def create_room_access_token(
+    room_id: int, username: str, expires_minutes: int = 30
+) -> str:
+    to_encode = {
+        "room_id": room_id,
+        "sub": username,
+        "exp": datetime.now() + timedelta(minutes=expires_minutes),
+    }
+    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)

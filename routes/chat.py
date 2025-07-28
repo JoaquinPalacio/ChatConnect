@@ -8,6 +8,7 @@ from utils.crud import get_user_by_username, create_message, get_last_messages
 from utils.templates_env import templates
 from db.database import get_session
 from db.models.room import Room
+from utils.crud import get_username_from_cookies, get_username_from_request
 
 
 manager = ConnectionManager()
@@ -16,7 +17,7 @@ router = APIRouter()
 
 @router.get("/")
 async def home(request: Request, session: Session = Depends(get_session)):
-    user = request.cookies.get("user")
+    user = get_username_from_request(request)
     messages = get_last_messages(session, limit=30, room_id=1)
     return templates.TemplateResponse(
         request, "index.html", {"user": user, "messages": messages}
@@ -27,7 +28,7 @@ async def home(request: Request, session: Session = Depends(get_session)):
 async def websocket_endpoint(
     websocket: WebSocket, session: Session = Depends(get_session)
 ):
-    username = websocket.cookies.get("user", "Anon")
+    username = get_username_from_cookies(websocket.cookies)
     print(f"User {username} connected")
     room_name = "global"
     room = session.exec(select(Room).where(Room.name == room_name)).first()
@@ -52,4 +53,3 @@ async def websocket_endpoint(
     except WebSocketDisconnect:
         manager.disconnect(websocket)
         await manager.broadcast(f"{username} disconnected")
-
