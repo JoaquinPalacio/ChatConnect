@@ -1,22 +1,15 @@
-from fastapi import APIRouter, Request, Depends, status
+from fastapi import Request, Depends, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from datetime import timedelta
 from db.database import get_session
-from utils.crud import get_user_by_username, create_user
-from utils.security import verify_password, create_acces_token
-from utils.templates_env import templates
+from crud.users import get_user_by_username
+from crud.users import create_user
+from core.security import verify_password
+from services.user_access import create_acces_token
+from core.templates_env import templates
 
 
-router = APIRouter()
-
-
-@router.get("/login")
-async def login(request: Request):
-    return templates.TemplateResponse(request, "login.html")
-
-
-@router.post("/login")
 async def login_post(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
     username = str(form.get("name"))
@@ -25,7 +18,7 @@ async def login_post(request: Request, session: Session = Depends(get_session)):
     if not user or not verify_password(password, user.hashed_password):
         return templates.TemplateResponse(
             request,
-            "login.html",
+            "auth/login.html",
             {"error": "Invalid credentials"},
             status_code=401,
         )
@@ -43,7 +36,6 @@ async def login_post(request: Request, session: Session = Depends(get_session)):
     return response
 
 
-@router.post("/signup")
 async def signup_post(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
     username = str(form.get("name"))
@@ -52,7 +44,7 @@ async def signup_post(request: Request, session: Session = Depends(get_session))
     if password != confirm_password:
         return templates.TemplateResponse(
             request,
-            "login.html",
+            "auth/login.html",
             {"error": "Passwords do not match"},
             status_code=400,
         )
@@ -60,7 +52,7 @@ async def signup_post(request: Request, session: Session = Depends(get_session))
     if db_user:
         return templates.TemplateResponse(
             request,
-            "login.html",
+            "auth/login.html",
             {"error": "Username already registered"},
             status_code=400,
         )
@@ -79,8 +71,7 @@ async def signup_post(request: Request, session: Session = Depends(get_session))
     return response
 
 
-@router.get("/logout")
-async def logout(request: Request):
+async def logout_get(request: Request):
     response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
     response.delete_cookie("access_token")
 

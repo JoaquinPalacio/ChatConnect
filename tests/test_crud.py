@@ -1,6 +1,7 @@
 import pytest
 from sqlmodel import Session, SQLModel, create_engine
-from utils.crud import create_user, get_user_by_username
+from crud.users import get_user_by_username
+from crud.user import create_user
 
 
 @pytest.fixture

@@ -5,14 +5,16 @@ from sqlalchemy import pool
 
 from alembic import context
 
-import os
+from config import get_settings
 from sqlmodel import SQLModel
 
+
+settings = get_settings()
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
 config = context.config
 
-DATABASE_URL = os.environ.get("DATABASE_URL", "sqlite:///default.db")
+DATABASE_URL = settings.database_url
 config.set_main_option("sqlalchemy.url", DATABASE_URL)
 # Interpret the config file for Python logging.
 # This line sets up loggers basically.

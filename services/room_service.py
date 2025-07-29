@@ -1,46 +1,35 @@
-from fastapi import APIRouter, Request, Depends, status, WebSocket, WebSocketDisconnect
+from fastapi import Request, Depends, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
-from datetime import datetime
-import json
 
 from db.database import get_session
-from db.models.room import Room
-from utils.crud import (
+from models.room import Room
+from crud.rooms import create_room
+from services.room_access import verify_room_access_token, create_room_access_token
+from crud.users import (
     get_user_by_username,
-    create_room,
-    create_message,
-    get_last_messages,
     get_username_from_request,
-    get_username_from_cookies,
-    verify_room_access_token,
 )
-from utils.templates_env import templates
-from utils.security import verify_password, create_room_access_token
-from utils.connection_manager import ConnectionManager
+from crud.chat import get_last_30_messages
+from core.templates_env import templates
+from core.security import verify_password
 
 
-manager = ConnectionManager()
-router = APIRouter()
-
-
-@router.get("/rooms")
-async def rooms(request: Request, session: Session = Depends(get_session)):
+async def rooms_get(request: Request, session: Session = Depends(get_session)):
     user = get_user_by_username(session, str(get_username_from_request(request)))
     rooms = session.exec(select(Room)).all()
     return templates.TemplateResponse(
-        "rooms.html",
+        "rooms/rooms.html",
         {"request": request, "user": user.username if user else None, "rooms": rooms},
     )
 
 
-@router.get("/rooms/{room_id}")
-async def room_id(
+async def room_id_get(
     request: Request, room_id: int, session: Session = Depends(get_session)
 ):
     user = get_user_by_username(session, str(get_username_from_request(request)))
     room = session.get(Room, room_id)
-    messages = get_last_messages(session, limit=30, room_id=room_id)
+    messages = get_last_30_messages(session, limit=30, room_id=room_id)
     if room is None:
         return templates.TemplateResponse(
             "404.html",
@@ -53,7 +42,7 @@ async def room_id(
             token, room_id, user.username if user else "Anon"
         ):
             return templates.TemplateResponse(
-                "room_password.html",
+                "rooms/room_password.html",
                 {
                     "request": request,
                     "user": user.username if user else None,
@@ -61,7 +50,7 @@ async def room_id(
                 },
             )
     return templates.TemplateResponse(
-        "room_id.html",
+        "rooms/room_id.html",
         {
             "request": request,
             "user": user.username if user else None,
@@ -71,8 +60,7 @@ async def room_id(
     )
 
 
-@router.post("/rooms/{room_id}/password")
-async def room_password(
+async def room_password_post(
     request: Request, room_id: int, session: Session = Depends(get_session)
 ):
     user = get_user_by_username(session, str(get_username_from_request(request)))
@@ -97,7 +85,7 @@ async def room_password(
         )
         return response
     return templates.TemplateResponse(
-        "room_password.html",
+        "rooms/room_password.html",
         {
             "request": request,
             "user": user.username if user else None,
@@ -107,43 +95,15 @@ async def room_password(
     )
 
 
-@router.websocket("/ws/{room_id}")
-async def websocket_room(
-    websocket: WebSocket, room_id: int, session: Session = Depends(get_session)
-):
-    username = get_username_from_cookies(websocket.cookies)
-    await manager.connect(websocket, f"{room_id}:{username}")
-    try:
-        while True:
-            data = await websocket.receive_text()
-            now = datetime.now()
-            message = {
-                "username": username,
-                "content": data,
-                "timestamp": now.strftime("%H:%M"),
-            }
-            await manager.broadcast(json.dumps(message))
-            user = get_user_by_username(session, username)
-            if user:
-                create_message(session, content=data, user_id=user.id, room_id=room_id)
-            else:
-                create_message(session, content=data, user_id=None, room_id=room_id)
-
-    except WebSocketDisconnect:
-        manager.disconnect(websocket)
-
-
-@router.get("/create_room")
-async def rooms_create(request: Request, session: Session = Depends(get_session)):
+async def create_room_get(request: Request, session: Session = Depends(get_session)):
     user = get_user_by_username(session, str(get_username_from_request(request)))
     return templates.TemplateResponse(
-        "create_room.html",
+        "rooms/create_room.html",
         {"request": request, "user": user.username if user else None},
     )
 
 
-@router.post("/create_room")
-async def rooms_create_post(request: Request, session: Session = Depends(get_session)):
+async def room_post(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
     user = get_user_by_username(session, str(get_username_from_request(request)))
     if user is None:
