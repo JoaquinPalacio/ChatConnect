@@ -75,10 +75,14 @@ SECRET_KEY=supersecretkey
 ```text
 ChatConnect/
 ├── main.py                # Punto de entrada de la app
-├── db/                    # Conexión y utilidades de base de datos
-├── routes/                # Rutas de la API (auth, chat)
+├── api/                   # Rutas y funcionalidades de la app
+├── core/                  # Lógica central de la app
+├── crud/                  # Funciones de acceso a datos para los modelos
+├── models/                # Modelos de la base de datos
+├── services/              # Lógica de negocio
+├── db/                    # Configuración y conexión a la base de datos
 ├── templates/             # Plantillas HTML (Jinja2)
-├── utils/                 # Utilidades (hash, seguridad, helpers)
+├── tests/                 # Tests de funcionamiento
 ├── docker-compose.yml
 ├── Dockerfile
 └── README.md
