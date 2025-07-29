@@ -41,6 +41,17 @@ async def room_id_get(
         if not token or not verify_room_access_token(
             token, room_id, user.username if user else "Anon"
         ):
+            if user and user.id == room.owner_id:
+                room_token = create_room_access_token(room_id, user.username)
+                response = RedirectResponse(url=f"/rooms/{room_id}", status_code=302)
+                response.set_cookie(
+                    key=f"room_{room_id}_access",
+                    value=room_token,
+                    httponly=True,
+                    max_age=60 * 30,
+                    samesite="lax",
+                )
+                return response
             return templates.TemplateResponse(
                 "rooms/room_password.html",
                 {
