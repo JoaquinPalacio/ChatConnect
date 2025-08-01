@@ -9,21 +9,102 @@
             <h5 class="card-title">Crear nueva sala</h5>
             <a href="/create_room" class="btn btn-primary mb-3">Crear Sala</a>
             <h5 class="card-title">Salas disponibles</h5>
-            <ul class="list-group">
+            <form method="get" class="mb-3" id="search-form">
+                <div class="input-group">
+                    <input type="text" name="q" id="live-search" value="{{ q or '' }}" class="form-control"
+                        placeholder="Buscar sala por nombre" aria-label="Buscar sala" autocomplete="off">
+                    <button class="btn btn-outline-secondary" type="submit">Buscar</button>
+                    {% if q %}
+                    <a href="{{ request.url.path }}" class="btn btn-link">Mostrar todas</a>
+                    {% endif %}
+                </div>
+            </form>
+
+            <ul id="rooms-list" class="list-group">
                 {% for room in rooms %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>{{ room.name }}</span>
+                    <span>{{ room.name | e }}</span>
                     <a href="/rooms/{{ room.id }}" class="btn btn-secondary btn-sm">Entrar</a>
                 </li>
                 {% endfor %}
             </ul>
-            {% if not rooms %}
-            <div class="alert alert-info mt-3" role="alert">
+
+            <div id="no-results" class="alert alert-warning mt-3 {% if rooms %}d-none{% endif %}" role="alert">
+                {% if q and not rooms %}
+                No se encontró ninguna sala con "{{ q }}".
+                {% elif not q and not rooms %}
                 No hay salas disponibles. Crea una nueva sala para empezar a chatear.
+                {% endif %}
             </div>
-            {% endif %}
         </div>
     </div>
+
+    <script>
+        function debounce(fn, delay) {
+            let timer;
+            return (...args) => {
+                clearTimeout(timer);
+                timer = setTimeout(() => fn(...args), delay);
+            };
+        }
+
+        async function fetchRooms(query) {
+            const params = new URLSearchParams();
+            if (query) params.set("q", query);
+            try {
+                const resp = await fetch(`/api/rooms?${params.toString()}`, { cache: "no-store" });
+                if (!resp.ok) {
+                    console.error("Error al buscar salas", resp.status);
+                    return;
+                }
+                const rooms = await resp.json();
+                const list = document.getElementById("rooms-list");
+                list.innerHTML = ""; // limpiar resultados anteriores
+
+                if (rooms.length === 0) {
+                    document.getElementById("no-results").classList.remove("d-none");
+                } else {
+                    document.getElementById("no-results").classList.add("d-none");
+                    for (const room of rooms) {
+                        const li = document.createElement("li");
+                        li.className = "list-group-item d-flex justify-content-between align-items-center";
+
+                        const span = document.createElement("span");
+                        span.textContent = room.name;
+
+                        const a = document.createElement("a");
+                        a.href = `/rooms/${room.id}`;
+                        a.className = "btn btn-secondary btn-sm";
+                        a.textContent = "Entrar";
+
+                        li.appendChild(span);
+                        li.appendChild(a);
+                        list.appendChild(li);
+                    }
+                }
+            } catch (err) {
+                console.error("Fallo de red al buscar salas:", err);
+            }
+        }
+
+        const input = document.getElementById("live-search");
+        if (input) {
+            const debounced = debounce((e) => {
+                const val = e.target.value.trim();
+                fetchRooms(val);
+
+                const url = new URL(window.location);
+                if (val) {
+                    url.searchParams.set("q", val);
+                } else {
+                    url.searchParams.delete("q");
+                }
+                window.history.replaceState({}, "", url);
+            }, 300);
+
+            input.addEventListener("input", debounced);
+        }
+    </script>
 </body>
 
 {% endblock %}

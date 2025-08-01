@@ -1,6 +1,7 @@
-from fastapi import Request, Depends, status
+from fastapi import Request, Depends, status, Query
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session, select
+from sqlalchemy import func
 
 from db.database import get_session
 from models.room import Room
@@ -15,12 +16,18 @@ from core.templates_env import templates
 from core.security import verify_password
 
 
-async def rooms_get(request: Request, session: Session = Depends(get_session)):
+async def get_rooms_by_q(q: str | None, session: Session):
+    statement = select(Room)
+    if q:
+        statement = statement.where(func.lower(Room.name).contains(q.lower()))
+    return session.exec(statement).all()
+
+async def rooms_get(request: Request, session: Session = Depends(get_session), q: str | None = None):
     user = get_user_by_username(session, str(get_username_from_request(request)))
-    rooms = session.exec(select(Room)).all()
+    rooms = await get_rooms_by_q(q, session)
     return templates.TemplateResponse(
         "rooms/rooms.html",
-        {"request": request, "user": user.username if user else None, "rooms": rooms},
+        {"request": request, "user": user.username if user else None, "rooms": rooms, "q": q},
     )
 
 
