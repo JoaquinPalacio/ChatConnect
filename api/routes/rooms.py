@@ -8,21 +8,29 @@ from services.room_service import (
     room_password_post,
     create_room_get,
     room_post,
-    get_rooms_by_q
 )
+from crud.rooms import search_rooms
 
 manager = ConnectionManager()
 router = APIRouter()
 
 
 @router.get("/rooms")
-async def rooms(request: Request, q: str | None = Query(None, description="Buscar sala por nombre"), session: Session = Depends(get_session)):
+async def rooms(
+    request: Request,
+    q: str | None = Query(None, description="Buscar sala por nombre"),
+    session: Session = Depends(get_session),
+):
     return await rooms_get(request, session, q)
 
+
 @router.get("/api/rooms")
-async def api_rooms(q: str | None = Query(None), session: Session = Depends(get_session)):
-    rooms = await get_rooms_by_q(q, session)
+async def api_rooms(
+    q: str | None = Query(None), session: Session = Depends(get_session)
+):
+    rooms = await search_rooms(session, q)
     return [{"id": room.id, "name": room.name} for room in rooms]
+
 
 @router.get("/rooms/{room_id}")
 async def room_id(

@@ -3,16 +3,11 @@ import json
 from core.connection_manager import ConnectionManager
 from crud.users import get_user_by_username
 from crud.chat import create_message
-from models.room import Room
-from sqlmodel import Session, select
+from crud.rooms import get_room_id_by_name
+from sqlmodel import Session
 from fastapi import WebSocket, WebSocketDisconnect
 
 manager = ConnectionManager()
-
-
-def get_room_id_by_name(session: Session, room_name: str) -> int | None:
-    room = session.exec(select(Room).where(Room.name == room_name)).first()
-    return room.id if room else None
 
 
 async def handle_global_chat(websocket: WebSocket, username: str, session: Session):

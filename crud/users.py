@@ -27,3 +27,10 @@ def get_username_from_cookies(cookies: dict) -> str:
 def get_username_from_request(request: Request) -> Optional[str]:
     token = str(request.cookies.get("access_token"))
     return decode_access_token(token)
+
+
+def get_user_from_request(session: Session, request: Request):
+    username = get_username_from_request(request)
+    if username is None:
+        return None
+    return get_user_by_username(session, str(username))
