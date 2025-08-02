@@ -32,25 +32,25 @@ async def api_rooms(
     return [{"id": room.id, "name": room.name} for room in rooms]
 
 
-@router.get("/rooms/{room_id}")
+@router.get("/rooms/{room_id:int}")
 async def room_id(
     request: Request, room_id: int, session: Session = Depends(get_session)
 ):
     return await room_id_get(request, room_id, session)
 
 
-@router.post("/rooms/{room_id}/password")
+@router.post("/rooms/{room_id:int}/password")
 async def room_password(
     request: Request, room_id: int, session: Session = Depends(get_session)
 ):
     return await room_password_post(request, room_id, session)
 
 
-@router.get("/create_room")
+@router.get("/rooms/create")
 async def rooms_create(request: Request, session: Session = Depends(get_session)):
     return await create_room_get(request, session)
 
 
-@router.post("/create_room")
+@router.post("/rooms/create")
 async def rooms_create_post(request: Request, session: Session = Depends(get_session)):
     return await room_post(request, session)

@@ -106,8 +106,7 @@ async def room_post(request: Request, session: Session = Depends(get_session)):
     form = await request.form()
     user = get_user_from_request(session, request)
     if user is None:
-        response = RedirectResponse(url="/login", status_code=302)
-        return response
+        return RedirectResponse(url="/login", status_code=302)
 
     name = str(form.get("name"))
     is_private = (
@@ -115,8 +114,24 @@ async def room_post(request: Request, session: Session = Depends(get_session)):
     )
     password = str(form.get("password")) if is_private else None
 
-    create_room(session, name, user.id, is_private, password)
-    return RedirectResponse(url="/rooms/", status_code=302)
+    room = create_room(session, name, user.id, is_private, password)
+
+    if room.is_private:
+        assert room.id is not None
+        return make_room_access_token_response(
+            room.id, user.username, f"/rooms/{room.id}"
+        )
+
+    messages = get_last_30_messages(session, limit=30, room_id=room.id)
+    return templates.TemplateResponse(
+        "rooms/room_id.html",
+        {
+            "request": request,
+            "user": user.username,
+            "room": room,
+            "messages": messages,
+        },
+    )
 
 
 def room_not_found(request: Request, user):
