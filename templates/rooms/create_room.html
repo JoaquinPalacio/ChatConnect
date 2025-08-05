@@ -6,6 +6,11 @@
     <div class="container mt-5">
         <h2 class="mb-4">Crear nueva sala</h2>
         <form method="post" action="/rooms/create" class="card p-4 shadow-sm">
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+            {% endif %}
             <div class="mb-3">
                 <label for="name" class="form-label">Nombre de la sala</label>
                 <input type="text" class="form-control" id="name" name="name" required>

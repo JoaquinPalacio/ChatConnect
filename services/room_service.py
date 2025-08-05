@@ -7,7 +7,7 @@ from services.room_access import (
     verify_room_access_token,
     make_room_access_token_response,
 )
-from crud.rooms import create_room, search_rooms, get_room_by_id
+from crud.rooms import create_room, search_rooms, get_room_by_id, get_room_id_by_name
 from crud.users import get_user_from_request
 from crud.chat import get_last_30_messages
 from core.templates_env import templates
@@ -113,6 +113,19 @@ async def room_post(request: Request, session: Session = Depends(get_session)):
         form.get("isPrivate") == "on" if form.get("isPrivate") is not None else False
     )
     password = str(form.get("password")) if is_private else None
+
+    existing_room_id = get_room_id_by_name(session, name)
+
+    if existing_room_id is not None:
+        return templates.TemplateResponse(
+            "rooms/create_room.html",
+            {
+                "request": request,
+                "user": user.username,
+                "error": "Room name already exists",
+            },
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
 
     room = create_room(session, name, user.id, is_private, password)
 

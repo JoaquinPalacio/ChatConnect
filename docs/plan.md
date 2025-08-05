@@ -6,7 +6,6 @@
 - Implementar modelo de salas y mensajes por sala.
 - Implementar modelo de amistad y sistema de solicitudes.
 - Agregar mensajes privados entre usuarios.
-- Historial de conversaciones con filtros (por usuario, sala, fecha, etc).
 
 ## Pendientes técnicos (Tech Debt)
 

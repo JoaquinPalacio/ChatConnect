@@ -9,7 +9,7 @@ def test_signup_and_login():
         # Signup
         res = client.post(
             "/signup",
-            data={"name": "testuser1", "password": "pass", "confirmPassword": "pass"},
+            data={"name": "usertest", "password": "pass", "confirmPassword": "pass"},
             follow_redirects=False,
         )
         assert res.status_code == 302
