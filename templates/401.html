@@ -1,24 +1,24 @@
 {% extends "base.html" %}
 
-{% block title %}401 - No autorizado{% endblock %}
+{% block title %}401 - Unauthorized{% endblock %}
 
 {% block content %}
 <div class="error-container"
     style="max-width:700px;margin:4rem auto;padding:1.5rem;border:1px solid #e2e8f0;border-radius:8px;font-family:system-ui,-apple-system,BlinkMacSystemFont,sans-serif;">
     <h1 style="font-size:3rem;margin-bottom:0.5rem;">401</h1>
-    <p style="font-size:1.25rem;margin-top:0;">Acceso no autorizado</p>
+    <p style="font-size:1.25rem;margin-top:0;">Unauthorized access</p>
     {% if user %}
-    <p>Hola <strong>{{ user }}</strong>, no tenés permisos para acceder a esta página o tu sesión expiró.</p>
+    <p>Hello <strong>{{ user }}</strong>, you do not have permission to access this page or your session has expired.
+    </p>
     {% else %}
-    <p>No estás autenticado o tu sesión expiró. Por favor, iniciá sesión para continuar.</p>
+    <p>You are not authenticated or your session has expired. Please log in to continue.</p>
     {% endif %}
 
     <div style="margin:1.5rem 0;display:flex;gap:1rem;flex-wrap:wrap;">
         <a href="/login"
-            style="padding:0.6rem 1rem;border-radius:6px;background:#2563eb;color:#fff;text-decoration:none;">Iniciar
-            sesión</a>
-        <a href="/" style="padding:0.6rem 1rem;border-radius:6px;background:#6b7280;color:#fff;text-decoration:none;">Ir
-            al inicio</a>
+            style="padding:0.6rem 1rem;border-radius:6px;background:#2563eb;color:#fff;text-decoration:none;">Login</a>
+        <a href="/" style="padding:0.6rem 1rem;border-radius:6px;background:#6b7280;color:#fff;text-decoration:none;">Go
+            to home</a>
     </div>
 
 </div>
