@@ -35,7 +35,9 @@ async def websocket_endpoint(
 
 @router.websocket("/ws/{room_id}")
 async def websocket_room(
-    websocket: WebSocket, room_id: int, session: Session = Depends(get_session)
+    websocket: WebSocket,
+    room_id: int,
+    session: Session = Depends(get_session),
 ):
     username = get_username_from_cookies(websocket.cookies)
     await handle_room_chat(websocket, room_id, username, session)

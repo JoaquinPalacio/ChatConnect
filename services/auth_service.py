@@ -1,10 +1,9 @@
-from fastapi import Request, Depends, status
+from fastapi import Request, Depends, status, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from datetime import timedelta
 from db.database import get_session
-from crud.users import get_user_by_username
-from crud.users import create_user
+from crud.users import get_user_by_username, create_user
 from core.security import verify_password
 from services.user_access import create_acces_token
 from core.templates_env import templates
@@ -73,10 +72,15 @@ async def signup_post(request: Request, session: Session = Depends(get_session))
 
 async def logout_get(request: Request):
     response = RedirectResponse(url="/login", status_code=status.HTTP_302_FOUND)
-    response.delete_cookie("access_token")
+    response.delete_cookie("access_token", path="/")
 
     for key in request.cookies:
         if key.startswith("room_") and key.endswith("_access"):
-            response.delete_cookie(key)
+            response.delete_cookie(key, path="/")
 
     return response
+
+
+def require_ajax(request: Request):
+    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)

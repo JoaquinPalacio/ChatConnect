@@ -1,23 +1,24 @@
 from fastapi import Request, Depends, status
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
-
+from models.user import User
 from db.database import get_session
 from services.room_access import (
     verify_room_access_token,
     make_room_access_token_response,
 )
 from crud.rooms import create_room, search_rooms, get_room_by_id, get_room_id_by_name
-from crud.users import get_user_from_request
 from crud.chat import get_last_30_messages
 from core.templates_env import templates
 from core.security import verify_password
 
 
 async def rooms_get(
-    request: Request, session: Session = Depends(get_session), q: str | None = None
+    request: Request,
+    user: User,
+    session: Session = Depends(get_session),
+    q: str | None = None,
 ):
-    user = get_user_from_request(session, request)
     rooms = await search_rooms(session, q)
     return templates.TemplateResponse(
         "rooms/rooms.html",
@@ -31,9 +32,8 @@ async def rooms_get(
 
 
 async def room_id_get(
-    request: Request, room_id: int, session: Session = Depends(get_session)
+    request: Request, user: User, room_id: int, session: Session = Depends(get_session)
 ):
-    user = get_user_from_request(session, request)
     room = get_room_by_id(session, room_id)
     if room is None:
         return room_not_found(request, user)
@@ -69,9 +69,8 @@ async def room_id_get(
 
 
 async def room_password_post(
-    request: Request, room_id: int, session: Session = Depends(get_session)
+    request: Request, user: User, room_id: int, session: Session = Depends(get_session)
 ):
-    user = get_user_from_request(session, request)
     room = get_room_by_id(session, room_id)
     if room is None:
         return room_not_found(request, user)
@@ -94,17 +93,19 @@ async def room_password_post(
     )
 
 
-async def create_room_get(request: Request, session: Session = Depends(get_session)):
-    user = get_user_from_request(session, request)
+async def create_room_get(
+    request: Request, user: User, session: Session = Depends(get_session)
+):
     return templates.TemplateResponse(
         "rooms/create_room.html",
         {"request": request, "user": user.username if user else None},
     )
 
 
-async def room_post(request: Request, session: Session = Depends(get_session)):
+async def room_post(
+    request: Request, user: User, session: Session = Depends(get_session)
+):
     form = await request.form()
-    user = get_user_from_request(session, request)
     if user is None:
         return RedirectResponse(url="/login", status_code=302)
 
