@@ -1,6 +1,6 @@
 # Chat Connect
 
-Aplicación web de chat en tiempo real construida con **FastAPI**, **WebSockets** y **PostgreSQL**. Permite a los usuarios registrarse, iniciar sesión y participar en un chat general en vivo.
+Aplicación web de chat en tiempo real construida con **FastAPI**, **WebSockets** y **PostgreSQL**. Permite a los usuarios registrarse, iniciar sesión y participar en salas públicas y privadas, además de un chat general.
 
 ## Demo
 
@@ -9,9 +9,13 @@ Aplicación web de chat en tiempo real construida con **FastAPI**, **WebSockets*
 ## Características
 
 - Registro e inicio de sesión de usuarios (con JWT y cookies).
-- Chat general en tiempo real usando WebSockets.
+- Chat general y salas personalizadas en tiempo real usando WebSockets.
+- Salas públicas y privadas (con contraseña).
+- Mensajes persistentes por sala.
 - Interfaz moderna con Bootstrap.
 - Dockerizado para fácil despliegue.
+- Tests automatizados con Pytest.
+- Arquitectura modular y escalable.
 
 ## Tecnologías utilizadas
 
@@ -20,6 +24,7 @@ Aplicación web de chat en tiempo real construida con **FastAPI**, **WebSockets*
 - Docker, Docker Compose
 - WebSockets
 - Bootstrap
+- Pytest
 
 ## Requisitos previos
 
@@ -69,6 +74,15 @@ SECRET_KEY=supersecretkey
 - Accede a la app: [http://localhost:8002](http://localhost:8002)
 - Documentación de la API: [http://localhost:8002/docs](http://localhost:8002/docs)
 
+## Funcionalidades principales
+
+- **Registro e inicio de sesión:** Los usuarios pueden crear cuentas y autenticarse.
+- **Chat general:** Todos los usuarios pueden participar en el chat global.
+- **Salas personalizadas:** Crea salas públicas o privadas (con contraseña).
+- **Mensajes persistentes:** Los mensajes se guardan por sala y usuario.
+- **Interfaz responsiva:** Bootstrap para una experiencia moderna.
+- **Gestión de sesiones:** Solo usuarios autenticados pueden crear salas o enviar mensajes.
+- **Tests:** Pruebas unitarias para usuarios, salas y mensajes.
 
 ## Estructura del proyecto
 
@@ -85,7 +99,16 @@ ChatConnect/
 ├── tests/                 # Tests de funcionamiento
 ├── docker-compose.yml
 ├── Dockerfile
+├── .env.example
 └── README.md
+```
+
+## Ejecutar tests
+
+Para ejecutar los tests automáticos:
+
+```bash
+pytest
 ```
 
 ## Contribución

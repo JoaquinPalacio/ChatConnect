@@ -1,6 +1,5 @@
 from fastapi import Request, WebSocket, APIRouter, Depends
 from sqlmodel import Session
-
 from core.connection_manager import ConnectionManager
 from crud.users import (
     get_username_from_cookies,

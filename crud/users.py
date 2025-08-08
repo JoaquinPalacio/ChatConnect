@@ -1,11 +1,9 @@
 from fastapi import Request, Depends, status, HTTPException
 from sqlmodel import Session, select
 from models.user import User
-from core.security import hash_password
-from services.user_access import decode_access_token
+from core.security import hash_password, decode_access_token
 from typing import Optional
 from db.database import get_session
-from core.templates_env import templates
 
 
 def create_user(session: Session, username: str, password: str):
@@ -43,11 +41,3 @@ def get_current_user(request: Request, session: Session = Depends(get_session)):
     if user is None:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
     return user
-
-
-def access_not_auth(request: Request):
-    return templates.TemplateResponse(
-        "401.html",
-        {"request": request, "user": None},
-        status_code=status.HTTP_401_UNAUTHORIZED,
-    )

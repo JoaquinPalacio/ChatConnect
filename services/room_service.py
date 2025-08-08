@@ -1,37 +1,19 @@
-from fastapi import Request, Depends, status
+from fastapi import Request, Depends, status, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlmodel import Session
 from models.user import User
 from db.database import get_session
-from services.room_access import (
+from crud.rooms import create_room, get_room_by_id, get_room_id_by_name
+from crud.chat import get_last_30_messages
+from core.templates_env import templates
+from core.security import (
+    verify_password,
     verify_room_access_token,
     make_room_access_token_response,
 )
-from crud.rooms import create_room, search_rooms, get_room_by_id, get_room_id_by_name
-from crud.chat import get_last_30_messages
-from core.templates_env import templates
-from core.security import verify_password
 
 
-async def rooms_get(
-    request: Request,
-    user: User,
-    session: Session = Depends(get_session),
-    q: str | None = None,
-):
-    rooms = await search_rooms(session, q)
-    return templates.TemplateResponse(
-        "rooms/rooms.html",
-        {
-            "request": request,
-            "user": user.username if user else None,
-            "rooms": rooms,
-            "q": q,
-        },
-    )
-
-
-async def room_id_get(
+async def access_room_by_id(
     request: Request, user: User, room_id: int, session: Session = Depends(get_session)
 ):
     room = get_room_by_id(session, room_id)
@@ -68,7 +50,7 @@ async def room_id_get(
     )
 
 
-async def room_password_post(
+async def access_private_room(
     request: Request, user: User, room_id: int, session: Session = Depends(get_session)
 ):
     room = get_room_by_id(session, room_id)
@@ -90,15 +72,6 @@ async def room_password_post(
             "room": room,
             "error": "Invalid password",
         },
-    )
-
-
-async def create_room_get(
-    request: Request, user: User, session: Session = Depends(get_session)
-):
-    return templates.TemplateResponse(
-        "rooms/create_room.html",
-        {"request": request, "user": user.username if user else None},
     )
 
 
@@ -154,3 +127,8 @@ def room_not_found(request: Request, user):
         {"request": request, "user": user.username if user else None},
         status_code=status.HTTP_404_NOT_FOUND,
     )
+
+
+def require_ajax(request: Request):
+    if request.headers.get("X-Requested-With") != "XMLHttpRequest":
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
